@@ -17,6 +17,7 @@ app.get('/', (req, res) => {
 })
 
 app.get('/registros', controller.getAll)
+app.get('/registro/:player', controller.getOne)
 app.post('/add-registro', controller.addRegistro)
 
 app.listen(PORT, () => {

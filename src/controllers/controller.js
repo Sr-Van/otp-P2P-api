@@ -11,7 +11,18 @@ module.exports = {
             res.status(500).send()
         }
     },
+
+    getOne: async (req, res) => {
+        try {
+            const registro = await service.getOne(req.params.player)
+            res.json(registro)
+        }
     
+        catch(error) {
+            res.status(500).send()
+        }
+    },
+
     addRegistro: async (req, res) => {
         try {
             const doc = req.body
