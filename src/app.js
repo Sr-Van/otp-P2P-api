@@ -19,6 +19,7 @@ app.get('/', (req, res) => {
 app.get('/sales', controller.getAllSales)
 app.get('/register/:player', controller.getOnePlayer)
 app.post('/add-register', controller.addRegister)
+app.get('/verification/:player', controller.verifyPlayer)
 
 app.listen(PORT, () => {
     console.log(`API listening on PORT ${PORT} `)

@@ -43,6 +43,25 @@ module.exports = {
         }
     },
 
+    verifyPlayer: async (req, res) => {
+        let json = {message: "Esse nickname ja está em uso!",verification : ""}
+        try {
+            const registro = await service.getOnePlayer(req.params.player)
+            if (registro) {
+                json.verification = "block"
+            } else {
+                json.verification = "release"
+                json.message = "Nickname disponivel"
+            }
+
+            res.json(json)
+        }
+    
+        catch(error) {
+            res.status(500).send()
+        }
+    },
+
     addRegister: async (req, res) => {
         try {
             const doc = req.body
