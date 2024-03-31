@@ -1,10 +1,25 @@
 const service = require('../services/service.js')
 
 module.exports = {
-    getAll: async (req, res) => {
+    getAllSales: async (req, res) => {
+        let json = {error: 'error', results: []}
         try {
-            const registros_achados = await service.getAll()
-            res.json(registros_achados)
+            const registros = await service.getAll()
+
+            registros.forEach(registros_achados => {
+
+                if (registros_achados.anuncios === null) {return}
+
+                registros_achados.anuncios.forEach(anuncio => {
+
+                    anuncio.player = registros_achados.player
+                    anuncio.mundo = registros_achados.mundo
+                    anuncio.badge = registros_achados.badge
+
+                    json.results.push(anuncio)
+                })
+            })
+            res.json(json)
         }
     
         catch(error) {
@@ -12,10 +27,15 @@ module.exports = {
         }
     },
 
-    getOne: async (req, res) => {
+    getOnePlayer: async (req, res) => {
         try {
-            const registro = await service.getOne(req.params.player)
-            res.json(registro)
+            const registro = await service.getOnePlayer(req.params.player)
+            res.json({
+                player: registro.player,
+                nome: registro.nome,
+                mundo: registro.mundo,
+                badge: registro.badge,
+            })
         }
     
         catch(error) {
@@ -23,10 +43,10 @@ module.exports = {
         }
     },
 
-    addRegistro: async (req, res) => {
+    addRegister: async (req, res) => {
         try {
             const doc = req.body
-            await service.addRegistro(doc)
+            await service.addRegister(doc)
             res.json({ "insert sended": "true" ,
                       "doc": doc});
         } 

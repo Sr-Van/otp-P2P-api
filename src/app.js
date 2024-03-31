@@ -16,9 +16,9 @@ app.get('/', (req, res) => {
     res.send('API rodando! 🥳')
 })
 
-app.get('/registros', controller.getAll)
-app.get('/registro/:player', controller.getOne)
-app.post('/add-registro', controller.addRegistro)
+app.get('/sales', controller.getAllSales)
+app.get('/register/:player', controller.getOnePlayer)
+app.post('/add-register', controller.addRegister)
 
 app.listen(PORT, () => {
     console.log(`API listening on PORT ${PORT} `)

@@ -6,11 +6,11 @@ module.exports = {
         return database.registros.find({}).toArray()
     },
 
-    getOne: async (player) => {
+    getOnePlayer: async (player) => {
         return database.registros.findOne({ "player": player})
     },
 
-    addRegistro: (doc) => {
+    addRegister: (doc) => {
         return database.registros.insertOne(doc)
     }
 }
