@@ -12,5 +12,9 @@ module.exports = {
 
     addRegister: (doc) => {
         return database.registros.insertOne(doc)
+    },
+
+    changeRegister: (player, att) => {
+        return database.registros.updateOne({ player : player}, att)
     }
 }

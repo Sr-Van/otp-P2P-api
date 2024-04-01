@@ -20,6 +20,10 @@ app.get('/sales', controller.getAllSales)
 app.get('/register/:player', controller.getOnePlayer)
 app.post('/add-register', controller.addRegister)
 app.get('/verification/:player', controller.verifyPlayer)
+app.put('/add/offer/:player', controller.addOffer)
+app.put('/add/sale/:player', controller.addSale)
+app.put('/add/shopping/:player', controller.addShopping)
+app.put('/add/rating/:player', controller.addRating)
 
 app.listen(PORT, () => {
     console.log(`API listening on PORT ${PORT} `)

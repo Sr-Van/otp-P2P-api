@@ -30,12 +30,7 @@ module.exports = {
     getOnePlayer: async (req, res) => {
         try {
             const registro = await service.getOnePlayer(req.params.player)
-            res.json({
-                player: registro.player,
-                nome: registro.nome,
-                mundo: registro.mundo,
-                badge: registro.badge,
-            })
+            res.json(registro)
         }
     
         catch(error) {
@@ -72,6 +67,62 @@ module.exports = {
         
         catch (error) {
             res.status(500).send('Internal Server Error' + error);
+        }
+    },
+
+    addOffer: async (req, res) => {
+        try {
+            
+            const att = { $set : {anuncios : req.body.anuncios}}
+            const registro = await service.changeRegister(req.params.player, att)
+
+            res.json(registro)
+        }
+    
+        catch(error) {
+            res.status(500).send()
+        }
+    },
+
+    addSale: async (req, res) => {
+        try {
+            
+            const att = { $set : {vendas : req.body.vendas}}
+            const registro = await service.changeRegister(req.params.player, att)
+
+            res.json(registro)
+        }
+    
+        catch(error) {
+            res.status(500).send()
+        }
+    },
+
+    addShopping: async (req, res) => {
+        try {
+            
+            const att = { $set : {compras : req.body.compras}}
+            const registro = await service.changeRegister(req.params.player, att)
+
+            res.json(registro)
+        }
+    
+        catch(error) {
+            res.status(500).send()
+        }
+    },
+
+    addRating: async (req, res) => {
+        try {
+            
+            const att = { $set : {avaliacao : req.body.avaliacao}}
+            const registro = await service.changeRegister(req.params.player, att)
+
+            res.json(registro)
+        }
+    
+        catch(error) {
+            res.status(500).send()
         }
     }
 }
