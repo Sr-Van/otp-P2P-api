@@ -1,4 +1,5 @@
 const Db = require('../db.js')
+const transport = require('../mail.js')
 const database = new Db()
 
 module.exports = {
@@ -16,5 +17,14 @@ module.exports = {
 
     changeRegister: (player, att) => {
         return database.registros.updateOne({ player : player}, att)
+    },
+
+    sendMail: ({email, subject, html}) => {
+        return transport.sendMail({
+            from: `<${process.env.GOOGLE_MAIL}>`,
+            to: email,
+            subject: subject,
+            html: html
+        })
     }
 }

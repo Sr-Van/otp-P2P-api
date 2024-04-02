@@ -1,5 +1,28 @@
 const service = require('../services/service.js')
 
+const templates = {
+    html: {
+        compra: 'Aguardando envio do vendedor!',
+        venda: 'Alguem quer comprar seu item!',
+        confirm_compra: 'Obrigado por sua compra.',
+        confirm_venda: 'Obrigado por vender conosco.'
+    },
+
+    text: {
+        compra: 'está separado e o vendedor já foi notificado!',
+        venda: 'foi comprado e o comprador aguarda seu envio.',
+        confirm_compra: 'foi entregue e agora você pode aproveita-lo.',
+        confirm_venda: 'foi vendido, parabens pela sua venda.'
+    },
+
+    subject: {
+        compra: 'Muito proximo do seu item!',
+        venda: 'Alguem está comprando seu item!',
+        confirm_compra: 'Item comprado.',
+        confirm_venda: 'Item vendido.'
+    }
+}
+
 module.exports = {
     getAllSales: async (req, res) => {
         let json = {error: 'error', results: []}
@@ -123,6 +146,32 @@ module.exports = {
     
         catch(error) {
             res.status(500).send()
+        }
+    },
+
+    sendMail: async (req, res) => {
+        const type = req.body.type
+        const mail = req.body.mail
+        const item = req.body.item
+        const player = req.body.player
+        const html = `
+                        <h1>${templates.html[type]}</h1>
+                        <p>Olá ${player}, o item: ${item} ${templates.text[type]}</p>
+                    `
+        
+        const subject = templates.subject[type]
+
+        try {
+            await service.sendMail({email: mail, html: html, subject: subject})
+            res.json({
+                email_sended: true,
+                type: type,
+                item: item
+            })
+        }
+
+        catch(error) {
+            res.status(500).send(error)
         }
     }
 }

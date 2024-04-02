@@ -24,6 +24,7 @@ app.put('/add/offer/:player', controller.addOffer)
 app.put('/add/sale/:player', controller.addSale)
 app.put('/add/shopping/:player', controller.addShopping)
 app.put('/add/rating/:player', controller.addRating)
+app.post('/send/mail', controller.sendMail)
 
 app.listen(PORT, () => {
     console.log(`API listening on PORT ${PORT} `)
