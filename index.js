@@ -1,6 +1,6 @@
 const express = require('express')
 const cors = require('cors')
-const controller = require('./src/controllers/controller.js')
+const controller = require('../src/controllers/controller.js')
 
 const app = express()
 const PORT = 3000
