@@ -36,7 +36,6 @@ module.exports = {
                 registros_achados.anuncios.forEach(anuncio => {
 
                     anuncio.player = registros_achados.player
-                    anuncio.mundo = registros_achados.mundo
                     anuncio.badge = registros_achados.badge
 
                     json.results.push(anuncio)
