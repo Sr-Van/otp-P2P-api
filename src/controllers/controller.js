@@ -52,7 +52,19 @@ module.exports = {
     getOnePlayer: async (req, res) => {
         try {
             const registro = await service.getOnePlayer(req.params.player)
-            res.json(registro)
+            res.json(
+                {
+                    _id: registro._id,
+                    player: registro.player,
+                    nome: registro.nome,
+                    mundo: registro.mundo,
+                    badge: registro.badge,
+                    anuncios: registro.anuncios,
+                    vendas: registro.vendas,
+                    compras: registro.compras,
+                    avaliacao: registro.avaliacao,
+                }
+            )
         }
     
         catch(error) {
@@ -93,6 +105,7 @@ module.exports = {
     },
 
     addOffer: async (req, res) => {
+        console.log(req.body)
         try {
             
             const att = { $set : {anuncios : req.body.anuncios}}
