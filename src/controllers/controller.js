@@ -37,6 +37,7 @@ module.exports = {
 
                     anuncio.player = registros_achados.player
                     anuncio.badge = registros_achados.badge
+                    anuncio.player_type = registros_achados.player_type
 
                     json.results.push(anuncio)
                 })
