@@ -1,4 +1,8 @@
 const service = require('../services/service.js')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+
+require('dotenv').config()
 
 const templates = {
     html: {
@@ -92,11 +96,68 @@ module.exports = {
         }
     },
 
-    addRegister: async (req, res) => {
+    playerLogin: async (req, res) => {
+
+        const {email, senha} = req.body
+
+        if(!email || !senha) {
+            return res.status(422).json({msg: "campos não enviados."})
+        }
+
+        const user = await service.verifyMail(email)
+
+        if(!user) {
+            return res.status(404).json({msg: 'usuario nao encontrado'})
+        }
+
+
+        const checkPass = await bcrypt.compare(senha, user.senha)
+
+        if(!checkPass) {
+            return res.status(422).json({msg: "senha invalida!"})            
+        }
+
         try {
-            const doc = req.body
+            const secret = process.env.SECRET
+            const token = jwt.sign({
+                id: user._id
+            }, secret)
+
+            res.status(200).json({msg: 'usuario logado com sucesso', token: token})
+
+        } catch(err) {
+            res.status(500).json(err)
+        }
+    },
+
+    addRegister: async (req, res) => {
+
+        const {email, senha, confirmSenha} = req.body
+
+        if(!email || !senha) {
+            return res.status(422).json({msg: 'email ou senha invalido'})
+        }
+
+        if(senha !== confirmSenha) {
+            return res.status(422).json({msg: 'senhas não batem.'})
+        }
+
+        const userExists = service.verifyMail(email)
+
+        if(userExists) {
+            return res.status(422).json({msg: 'email já utilizado.'})
+        }
+
+        const salt = await bcrypt.genSalt(12)
+        const passHash = await bcrypt.hash(senha, salt)
+
+        let doc = req.body
+        doc.senha = passHash
+
+        try {
+
             await service.addRegister(doc)
-            res.json({ "insert sended": "true" ,
+            res.status(201).json({ "insert sended": "true" ,
                       "doc": doc});
         } 
         
@@ -106,7 +167,7 @@ module.exports = {
     },
 
     addOffer: async (req, res) => {
-        console.log(req.body)
+
         try {
             
             const att = { $set : {anuncios : req.body.anuncios}}

@@ -7,6 +7,10 @@ module.exports = {
         return database.registros.find({}).toArray()
     },
 
+    verifyMail: (email) => {
+        return database.registros.findOne({ "email": email })
+    },
+
     getOnePlayer: async (player) => {
         return database.registros.findOne({ "player": player})
     },
