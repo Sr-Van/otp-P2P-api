@@ -17,11 +17,14 @@ app.get('/', (req, res) => {
     res.send('API rodando! 🥳')
 })
 
+//public routes
 app.post('/auth/login', controller.playerLogin)
-app.get('/sales', controller.getAllSales)
-app.get('/register/:player', middleware.checkToken, controller.getOnePlayer)
 app.post('/add-register', controller.addRegister)
+app.get('/sales', controller.getAllSales)
 app.get('/verification/:player', controller.verifyPlayer)
+
+//private routes
+app.get('/register/:player', middleware.checkToken, controller.getOnePlayer)
 app.put('/add/offer/:player', middleware.checkToken, controller.addOffer)
 app.put('/add/sale/:player', middleware.checkToken, controller.addSale)
 app.put('/add/shopping/:player', middleware.checkToken, controller.addShopping)

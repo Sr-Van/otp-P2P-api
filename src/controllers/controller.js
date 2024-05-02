@@ -29,8 +29,11 @@ const templates = {
 
 module.exports = {
     getAllSales: async (req, res) => {
+
         let json = {error: 'error', results: []}
+
         try {
+
             const registros = await service.getAll()
 
             registros.forEach(registros_achados => {
@@ -44,20 +47,26 @@ module.exports = {
                     anuncio.playerType = registros_achados.playerType
 
                     json.results.push(anuncio)
+
                 })
             })
-            res.json(json)
+
+            res.status(200).json(json)
+            
         }
     
         catch(error) {
-            res.status(500).send()
+            res.status(500).json({msg: 'Erro no servidor '+ error})
         }
     },
 
     getOnePlayer: async (req, res) => {
+
         try {
+
             const registro = await service.getOnePlayer(req.params.player)
-            res.json(
+
+            res.status(200).json(
                 {
                     _id: registro._id,
                     player: registro.player,
@@ -73,26 +82,35 @@ module.exports = {
         }
     
         catch(error) {
-            res.status(500).send()
+            res.status(500).json({msg: 'Erro no servidor '+ error})
         }
     },
 
     verifyPlayer: async (req, res) => {
+
         let json = {message: "Esse nickname ja está em uso!",verification : ""}
+
         try {
+
             const registro = await service.getOnePlayer(req.params.player)
+
             if (registro) {
+
                 json.verification = "block"
+                res.status(422).json(json)
+
             } else {
+
                 json.verification = "release"
                 json.message = "Nickname disponivel"
-            }
 
-            res.json(json)
+                return res.status(200).json(json)
+
+            }
         }
     
         catch(error) {
-            res.status(500).send()
+            res.status(500).json({msg: 'Erro no servidor '+ error})
         }
     },
 
@@ -135,17 +153,17 @@ module.exports = {
         const {email, senha, confirmSenha} = req.body
 
         if(!email || !senha) {
-            return res.status(422).json({msg: 'email ou senha invalido'})
+            return res.status(422).json({msg: 'Email ou senha invalido.'})
         }
 
         if(senha !== confirmSenha) {
-            return res.status(422).json({msg: 'senhas não batem.'})
+            return res.status(422).json({msg: 'Senhas não batem.'})
         }
 
-        const userExists = service.verifyMail(email)
+        const userExists = await service.verifyMail(email)
 
         if(userExists) {
-            return res.status(422).json({msg: 'email já utilizado.'})
+            return res.status(422).json({msg: 'Email já utilizado.'})
         }
 
         const salt = await bcrypt.genSalt(12)
@@ -153,12 +171,19 @@ module.exports = {
 
         let doc = req.body
         doc.senha = passHash
+        delete doc.confirmSenha
 
         try {
 
             await service.addRegister(doc)
-            res.status(201).json({ "insert sended": "true" ,
-                      "doc": doc});
+
+            res.status(201).json(
+                { 
+                    insert_sended: "true" ,
+                    msg: 'Cadastro realizado!'
+
+                });
+
         } 
         
         catch (error) {
@@ -173,11 +198,13 @@ module.exports = {
             const att = { $set : {anuncios : req.body.anuncios}}
             const registro = await service.changeRegister(req.params.player, att)
 
-            res.json(registro)
+            res.status(201).json({msg: "Anuncio adicionado com sucesso!", 
+            id: registro.itemId})
+
         }
     
         catch(error) {
-            res.status(500).send()
+            res.status(500).json({error: 'Erro no servidor ' +  error})
         }
     },
 
@@ -185,13 +212,13 @@ module.exports = {
         try {
             
             const att = { $set : {vendas : req.body.vendas}}
-            const registro = await service.changeRegister(req.params.player, att)
+            await service.changeRegister(req.params.player, att)
 
-            res.json(registro)
+            res.status(201).json({msg: 'Venda confirmada e adicionada.'})
         }
     
         catch(error) {
-            res.status(500).send()
+            res.status(500).json({msg: 'Erro no servidor ' + error})
         }
     },
 
@@ -199,13 +226,13 @@ module.exports = {
         try {
             
             const att = { $set : {compras : req.body.compras}}
-            const registro = await service.changeRegister(req.params.player, att)
+            await service.changeRegister(req.params.player, att)
 
-            res.json(registro)
+            res.status(201).json({msg: 'Compra realizada e adicionada ao banco.'})
         }
     
         catch(error) {
-            res.status(500).send()
+            res.status(500).json({msg: 'Erro no servidor '+ error})
         }
     },
 
@@ -213,21 +240,27 @@ module.exports = {
         try {
             
             const att = { $set : {avaliacao : req.body.avaliacao}}
-            const registro = await service.changeRegister(req.params.player, att)
+            await service.changeRegister(req.params.player, att)
 
-            res.json(registro)
+            res.status(201).json({msg: 'Avaliação enviada e registrada no banco.'})
         }
     
         catch(error) {
-            res.status(500).send()
+            res.status(500).json({msg: 'Erro no servidor '+ error})
         }
     },
 
     sendMail: async (req, res) => {
-        const type = req.body.type
-        const mail = req.body.mail
-        const item = req.body.item
-        const player = req.body.player
+
+        const {type, mail, item, player} = req.body
+
+        const userExists = await service.verifyMail(mail)
+
+        if(!userExists) {
+            return res.status(404).json({msg: 'Este e-mail não está cadastrado.'})
+        }
+
+
         const html = `
                         <h1>${templates.html[type]}</h1>
                         <p>Olá ${player}, o item: ${item} ${templates.text[type]}</p>
@@ -236,16 +269,18 @@ module.exports = {
         const subject = templates.subject[type]
 
         try {
+
             await service.sendMail({email: mail, html: html, subject: subject})
-            res.json({
+
+            res.status(200).json({
                 email_sended: true,
-                type: type,
-                item: item
+                msg: 'Seu e-mail foi enviado.'
             })
+
         }
 
         catch(error) {
-            res.status(500).send(error)
+            res.status(500).json({msg: 'Erro no servidor '+ error})
         }
     }
 }
