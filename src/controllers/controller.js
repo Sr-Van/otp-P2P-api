@@ -141,7 +141,12 @@ module.exports = {
                 id: user._id
             }, secret)
 
-            res.status(200).json({msg: 'usuario logado com sucesso', token: token})
+            res.status(200).json({
+                msg: 'usuario logado com sucesso', 
+                token: token,
+                player: user.player,
+                loggedAt: new Date()
+            })
 
         } catch(err) {
             res.status(500).json(err)
