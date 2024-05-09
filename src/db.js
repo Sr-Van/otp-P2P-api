@@ -8,9 +8,18 @@ require('dotenv').config({
 })
 
 class Db {
-    client = new MongoClient(process.env.MONGO_URI)
-    database = this.client.db('Otp-P2P')
-    registros = this.database.collection('registros')
+
+    /**
+     * Initializes a new instance of the class and establishes a connection to the MongoDB database.
+     *
+     * @return {void}
+     */
+    constructor() {
+        this.client = new MongoClient(process.env.MONGO_URI)
+        this.database = this.client.db('Otp-P2P')
+        this.registros = this.database.collection('registros')
+    }
+
 }
 
 
