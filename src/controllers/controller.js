@@ -198,13 +198,25 @@ module.exports = {
 
     addOffer: async (req, res) => {
 
+        const item = req.body
+        const player = req.params.player
+
+        const playerExists = await service.getOnePlayer(player)
+
+        if(!playerExists) {
+            return res.status(404).json({msg: 'Jogador não encontrado.'})
+        }
+
+        let playerOffers = playerExists.anuncios
+        playerOffers.push(item)
+
         try {
             
-            const att = { $set : {anuncios : req.body.anuncios}}
-            const registro = await service.changeRegister(req.params.player, att)
+            const att = { $set : {anuncios : playerOffers}}
+            await service.changeRegister(player, att)
 
             res.status(201).json({msg: "Anuncio adicionado com sucesso!", 
-            id: registro.itemId})
+            id: item.itemId})
 
         }
     
@@ -213,38 +225,80 @@ module.exports = {
         }
     },
 
-    addSale: async (req, res) => {
-        try {
-            
-            const att = { $set : {vendas : req.body.vendas}}
-            await service.changeRegister(req.params.player, att)
+    addTrade: async (req, res) => {
 
-            res.status(201).json({msg: 'Venda confirmada e adicionada.'})
+        //getting just usefull data
+        const {player, itemId, trade_player} = req.body
+
+        const playerExists = await service.getOnePlayer(player)
+        const playerTradeExists = await service.getOnePlayer(trade_player)
+
+        if(!playerExists || !playerTradeExists) {
+            return res.status(404).json({msg: 'Jogador não encontrado.'})
         }
-    
-        catch(error) {
+
+        const playerOffers = playerExists.anuncios
+
+        let itemExists = playerOffers.filter(item => item.itemId === itemId)[0]
+
+        if(!itemExists) {
+            return res.status(404).json({msg: 'Item não encontrado.'})
+        }
+
+        itemExists.situation = 'ordered'
+        itemExists.trade_player = trade_player
+
+        const newOffers = playerOffers.filter(item => item.itemId !== itemId)
+
+        let newSales = playerExists.vendas
+        let newTradePlayerShopping = playerTradeExists.compras
+
+        newSales.push(itemExists)
+        newTradePlayerShopping.push(itemExists)
+
+
+        try {
+
+            const attPlayer = { 
+                $set : {
+                    anuncios : newOffers,
+                    vendas : newSales
+            }}
+
+            const attPlayerTrade = { 
+                $set : {
+                    compras : newTradePlayerShopping
+            }}
+
+            await service.changeRegister(player, attPlayer)
+            await service.changeRegister(trade_player, attPlayerTrade)
+
+            res.status(201).json({msg: 'Anuncios atualizados.'})
+        } catch(error) {
             res.status(500).json({msg: 'Erro no servidor ' + error})
         }
-    },
 
-    addShopping: async (req, res) => {
-        try {
-            
-            const att = { $set : {compras : req.body.compras}}
-            await service.changeRegister(req.params.player, att)
-
-            res.status(201).json({msg: 'Compra realizada e adicionada ao banco.'})
-        }
     
-        catch(error) {
-            res.status(500).json({msg: 'Erro no servidor '+ error})
-        }
     },
 
     addRating: async (req, res) => {
+
+        const player = req.params.player
+        const {rating, player_rating} = req.body
+
+        const playerExists = await service.getOnePlayer(player)
+        const playerRatingExists = await service.getOnePlayer(player_rating)
+
+        if(!playerExists || !playerRatingExists) {
+            return res.status(404).json({msg: 'Jogador não encontrado.'})
+        }
+
+        let playerRating = playerExists.avaliacao
+        playerRating.push(rating)
+
         try {
             
-            const att = { $set : {avaliacao : req.body.avaliacao}}
+            const att = { $set : {avaliacao : playerRating}}
             await service.changeRegister(req.params.player, att)
 
             res.status(201).json({msg: 'Avaliação enviada e registrada no banco.'})

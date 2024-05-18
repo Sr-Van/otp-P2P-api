@@ -26,8 +26,7 @@ app.get('/verification/:player', controller.verifyPlayer)
 //private routes
 app.get('/register/:player', middleware.checkToken, controller.getOnePlayer)
 app.put('/add/offer/:player', middleware.checkToken, controller.addOffer)
-app.put('/add/sale/:player', middleware.checkToken, controller.addSale)
-app.put('/add/shopping/:player', middleware.checkToken, controller.addShopping)
+app.put('/add/trade', middleware.checkToken, controller.addTrade)
 app.put('/add/rating/:player', middleware.checkToken, controller.addRating)
 app.post('/send/mail', middleware.checkToken, controller.sendMail)
 
