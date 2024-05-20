@@ -237,40 +237,43 @@ module.exports = {
             return res.status(404).json({msg: 'Jogador não encontrado.'})
         }
 
-        const playerOffers = playerExists.anuncios
-
-        let itemExists = playerOffers.filter(item => item.itemId === itemId)[0]
-
-        if(!itemExists) {
-            return res.status(404).json({msg: 'Item não encontrado.'})
-        }
-
-        itemExists.situation = 'ordered'
-        itemExists.trade_player = trade_player
-
-        const newOffers = playerOffers.filter(item => item.itemId !== itemId)
-
-        let newSales = playerExists.vendas
-        let newTradePlayerShopping = playerTradeExists.compras
-
-        newSales.push(itemExists)
-        newTradePlayerShopping.push(itemExists)
-
-
+        
+        
         try {
+            
+            const playerOffers = playerExists.anuncios
+    
+            let itemExists = playerOffers.filter(item => item.itemId === itemId)[0]
+    
+            if(!itemExists) {
+                return res.status(404).json({msg: 'Item não encontrado.'})
+            }
+    
+            itemExists.situation = 'ordered'
+            itemExists.trade_player = trade_player
+            
+            const newOffers = playerOffers.filter(item => item.itemId !== itemId)
+    
+            let newSales = playerExists.vendas
+            let newTradePlayerShopping = playerTradeExists.compras
+    
+            newSales.push(itemExists)
+            
 
             const attPlayer = { 
                 $set : {
                     anuncios : newOffers,
                     vendas : newSales
             }}
+            await service.changeRegister(player, attPlayer)
 
+            itemExists.trade_player = player
+            newTradePlayerShopping.push(itemExists)
             const attPlayerTrade = { 
                 $set : {
                     compras : newTradePlayerShopping
             }}
 
-            await service.changeRegister(player, attPlayer)
             await service.changeRegister(trade_player, attPlayerTrade)
 
             res.status(201).json({msg: 'Anuncios atualizados.'})
@@ -279,6 +282,58 @@ module.exports = {
         }
 
     
+    },
+
+    confirmTrade: async (req, res) => { 
+
+        const type = req.params.type
+        const {seller, itemId, buyer} = req.body
+
+        const sellerExists = await service.getOnePlayer(seller)
+        const buyerExists = await service.getOnePlayer(buyer)
+
+        
+        if(!sellerExists || !buyerExists) {
+            return res.status(404).json({msg: 'Jogador não encontrado.'})
+        }
+        
+        let itemSellerExists = sellerExists.vendas.filter(item => item.itemId === itemId)[0]
+        let itemBuyerExists = buyerExists.compras.filter(item => item.itemId === itemId)[0]
+        
+        if(!itemSellerExists || !itemBuyerExists) {
+            return res.status(404).json({msg: 'Item não encontrado.'})
+        }
+        
+        if(type === 'seller') {
+            itemSellerExists.situation = 'sended'
+            itemBuyerExists.situation = 'sended'
+        } else {
+            itemSellerExists.situation = 'received'
+            itemBuyerExists.situation = 'received'
+        }
+
+        let newSales = sellerExists.vendas.filter(item => item.itemId !== itemId)
+        newSales.push(itemSellerExists)
+
+
+        let newShopping = buyerExists.compras.filter(item => item.itemId !== itemId)
+
+        newShopping.push(itemBuyerExists)
+
+
+        try {
+
+            const attSeller = { $set : {vendas : newSales}}
+            const attBuyer = { $set : {compras : newShopping}}
+
+            await service.changeRegister(seller, attSeller)
+            await service.changeRegister(buyer, attBuyer)
+
+            res.status(201).json({msg: 'Registros dos clientes atualizados.'})
+        } catch(error) {
+            res.status(500).json({msg: 'Erro no servidor ' + error})
+        }
+
     },
 
     addRating: async (req, res) => {
