@@ -207,6 +207,8 @@ module.exports = {
             return res.status(404).json({msg: 'Jogador não encontrado.'})
         }
 
+        item.situation = "available"
+
         let playerOffers = playerExists.anuncios
         playerOffers.push(item)
 
@@ -224,7 +226,30 @@ module.exports = {
             res.status(500).json({error: 'Erro no servidor ' +  error})
         }
     },
+    deleteOffer: async (req, res) => {
+        const {player, itemId} = req.body
 
+        const playerExists = await service.getOnePlayer(player)
+
+        if(!playerExists) {
+            return res.status(404).json({msg: 'Jogador não encontrado.'})
+        }
+
+        let playerOffers = playerExists.anuncios
+
+        let newOffers = playerOffers.filter(item => item.itemId !== itemId)
+
+        try {
+            
+            const att = { $set : {anuncios : newOffers}}
+            await service.changeRegister(player, att)
+
+            res.status(201).json({msg: "Anuncio removido com sucesso!"})
+        } catch(error) {
+            res.status(500).json({error: 'Erro no servidor ' +  error})
+        }   
+    },
+    
     addTrade: async (req, res) => {
 
         //getting just usefull data
