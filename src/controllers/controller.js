@@ -374,7 +374,7 @@ module.exports = {
         }
 
         let playerRating = playerExists.avaliacao
-        playerRating.push(rating)
+        playerRating.push(req.body)
 
         try {
             
@@ -386,6 +386,25 @@ module.exports = {
     
         catch(error) {
             res.status(500).json({msg: 'Erro no servidor '+ error})
+        }
+    },
+
+    deleteAccount: async (req, res) => {
+
+        const player = req.params.player
+        const playerExists = await service.getOnePlayer(player)
+
+        if(!playerExists) {
+            return res.status(404).json({msg: 'Jogador não encontrado.'})
+        }
+
+        try {
+            await service.deleteRegister(player)
+
+            res.status(201).json({msg: 'Conta excluída com sucesso!'})
+
+        } catch(error) {
+            res.status(500).json({msg: 'Erro no servidor '})
         }
     },
 

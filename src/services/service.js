@@ -23,6 +23,10 @@ module.exports = {
         return database.registros.updateOne({ player : player}, att)
     },
 
+    deleteRegister: (player) => {
+        return database.registros.deleteOne({ player : player})
+    },
+
     sendMail: ({email, subject, html}) => {
         return transport.sendMail({
             from: `<${process.env.GOOGLE_MAIL}>`,

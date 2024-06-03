@@ -30,6 +30,7 @@ app.put('/remove/offer', middleware.checkToken, controller.deleteOffer)
 app.put('/add/trade', middleware.checkToken, controller.addTrade)
 app.put('/add/rating/:player', middleware.checkToken, controller.addRating)
 app.put('/trade/confirm/:type', middleware.checkToken, controller.confirmTrade)
+app.delete('/delete/acc/:player', middleware.checkToken, controller.deleteAccount)
 app.post('/send/mail', middleware.checkToken, controller.sendMail)
 
 app.listen(PORT, () => {
