@@ -74,6 +74,8 @@ module.exports = {
                     nome: registro.nome,
                     mundo: registro.mundo,
                     badge: registro.badge,
+                    ammount: registro.ammount,
+                    verified: registro.verified,
                     anuncios: registro.anuncios,
                     vendas: registro.vendas,
                     compras: registro.compras,
