@@ -8,7 +8,8 @@ const PORT = 3000
 
 
 app.use(cors({
-    allowedHeaders: ['Authorization','Content-Type'],  
+    allowedHeaders: ['Authorization','Content-Type'], 
+    origin: '*' 
 }));
 
 app.use(express.json())
