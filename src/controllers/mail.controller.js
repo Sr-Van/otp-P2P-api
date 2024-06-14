@@ -65,7 +65,7 @@ module.exports = {
                                             Para que todas as funcionalidades do site sejam liberadas precisamos verificar seu e-mail.</p>
                                             <p>Caso tenha sido voce, clique no link abaixo para confirmar seu cadastro:</p>
                                             <br>
-                                            <a href="http://localhost:4200/#/confirm/acc/verification/${player}/${token}">Clique aqui</a>
+                                            <a href="http://localhost:4200/#/confirm/acc/verification/${email}/${token}">Clique aqui</a>
                                 </table>
                             </td>
                         </tr>
@@ -128,7 +128,7 @@ module.exports = {
                     </tr>
                     <tr>
                         <td class="header" style="background-color: #ffffff; padding: 20px; text-align: center; font-size: 24px;">
-                            <h1>Confirmar seu cadastro</h1>
+                            <h1>Cadastro concluído</h1>
                         </td>
                     </tr>
 

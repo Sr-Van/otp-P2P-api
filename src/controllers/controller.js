@@ -217,42 +217,34 @@ module.exports = {
     },
 
     verifyEmailToken: async (req, res) => {
-        console.log("Verify Email Token Request Received")
         
         const {token, email} = req.body
         const decoded = jwt.verify(token, process.env.SECRET)
 
-        console.log(`Decoded Email: ${decoded.email}`)
 
         if (decoded.email !== email) {
-            console.log("Invalid Token")
             return res.status(401).send('Invalid Token')
         }
 
         const userExists = await service.verifyMail(email)
 
         if(!userExists) {
-            console.log("Email not found")
             return res.status(404).json({msg: 'Email não encontrado.'})
         }
 
         if(userExists.verified) {
-            console.log("Email already verified")
             return res.status(409).json({msg: 'Email ja verificado.'})
         }
 
         try {
-            console.log("Updating user registration")
             const att = { $set : {verified : true}}
             await service.changeRegister(userExists.player, att)
     
-            console.log("Email verified successfully")
             res.status(201).json({msg: 'Email verificado com sucesso.'})
 
             mailcontroller.sendEmailConfirmed({email: userExists.email, player: userExists.player});
     
         } catch(error) {
-            console.log(`Error: ${error}`)
             res.status(500).json({error: 'Erro no servidor ' +  error})
         }   
     },
