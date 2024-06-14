@@ -22,6 +22,7 @@ app.post('/auth/login', controller.playerLogin)
 app.post('/add-register', controller.addRegister)
 app.get('/sales', controller.getAllSales)
 app.get('/verification/:player', controller.verifyPlayer)
+app.put('/confirm/acc/verification', controller.verifyEmailToken)
 
 //private routes
 app.get('/register/:player', middleware.checkToken, controller.getOnePlayer)

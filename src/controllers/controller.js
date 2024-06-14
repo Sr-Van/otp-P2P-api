@@ -1,6 +1,7 @@
 const service = require('../services/service.js')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const mailcontroller = require('../controllers/mail.controller.js')
 
 require('dotenv').config()
 
@@ -155,7 +156,21 @@ module.exports = {
 
     addRegister: async (req, res) => {
 
-        const {email, senha, confirmSenha} = req.body
+        const {email, senha, confirmSenha, player, nome, cpf, mundo} = req.body
+
+        if(!player) return res.status(422).json({msg: 'Nickname obrigatóriorio.'})
+
+        if(!nome) return res.status(422).json({msg: 'Nome obrigatório.'})
+
+        if(!cpf) return res.status(422).json({msg: 'Cpf obrigatório.'})
+
+        if(!mundo) return res.status(422).json({msg: 'Mundo obrigatório.'})
+
+        if(!email) return res.status(422).json({msg: 'Email obrigatório.'})
+
+        if(!senha) return res.status(422).json({msg: 'Senha obrigatória.'})
+
+        if(!confirmSenha) return res.status(422).json({msg: 'Confirmar sua senha.'})
 
         if(!email || !senha) {
             return res.status(422).json({msg: 'Email ou senha invalido.'})
@@ -167,15 +182,18 @@ module.exports = {
 
         const userExists = await service.verifyMail(email)
 
-        if(userExists) {
-            return res.status(422).json({msg: 'Email já utilizado.'})
-        }
+        if(userExists) return res.status(422).json({msg: 'Email já utilizado.'})
 
         const salt = await bcrypt.genSalt(12)
         const passHash = await bcrypt.hash(senha, salt)
 
         let doc = req.body
         doc.senha = passHash
+        doc.ammount = 0
+        doc.verified = false
+        const verificationToken = jwt.sign(
+            { email: doc.email }
+            , process.env.SECRET)
         delete doc.confirmSenha
 
         try {
@@ -185,15 +203,58 @@ module.exports = {
             res.status(201).json(
                 { 
                     insert_sended: "true" ,
-                    msg: 'Cadastro realizado!'
+                    msg: 'Cadastro realizado!',
 
                 });
+
+            mailcontroller.sendEmailToken({email: doc.email, token: verificationToken, player: doc.player});
 
         } 
         
         catch (error) {
             res.status(500).send('Internal Server Error' + error);
         }
+    },
+
+    verifyEmailToken: async (req, res) => {
+        console.log("Verify Email Token Request Received")
+        
+        const {token, email} = req.body
+        const decoded = jwt.verify(token, process.env.SECRET)
+
+        console.log(`Decoded Email: ${decoded.email}`)
+
+        if (decoded.email !== email) {
+            console.log("Invalid Token")
+            return res.status(401).send('Invalid Token')
+        }
+
+        const userExists = await service.verifyMail(email)
+
+        if(!userExists) {
+            console.log("Email not found")
+            return res.status(404).json({msg: 'Email não encontrado.'})
+        }
+
+        if(userExists.verified) {
+            console.log("Email already verified")
+            return res.status(409).json({msg: 'Email ja verificado.'})
+        }
+
+        try {
+            console.log("Updating user registration")
+            const att = { $set : {verified : true}}
+            await service.changeRegister(userExists.player, att)
+    
+            console.log("Email verified successfully")
+            res.status(201).json({msg: 'Email verificado com sucesso.'})
+
+            mailcontroller.sendEmailConfirmed({email: userExists.email, player: userExists.player});
+    
+        } catch(error) {
+            console.log(`Error: ${error}`)
+            res.status(500).json({error: 'Erro no servidor ' +  error})
+        }   
     },
 
     addOffer: async (req, res) => {
