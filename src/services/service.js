@@ -34,5 +34,8 @@ module.exports = {
             subject: subject,
             html: html
         })
+    },
+    addAmmount: async (ammount, player) => {
+        return database.registros.updateOne({ player: player }, { $inc: { ammount: ammount } })
     }
 }

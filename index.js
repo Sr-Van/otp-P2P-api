@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const controller = require('./src/controllers/controller.js')
+const moneyController = require('./src/controllers/money.controller.js')
 const middleware = require('./src/middlewares/middleware.js')
 
 const app = express()
@@ -32,6 +33,7 @@ app.put('/remove/offer', middleware.checkToken, controller.deleteOffer)
 app.put('/add/trade', middleware.checkToken, controller.addTrade)
 app.put('/add/rating/:player', middleware.checkToken, controller.addRating)
 app.put('/trade/confirm/:type', middleware.checkToken, controller.confirmTrade)
+app.put('/add/ammount/:player', middleware.checkToken, moneyController.addAmmount)
 app.delete('/delete/acc/:player', middleware.checkToken, controller.deleteAccount)
 app.post('/send/mail', middleware.checkToken, controller.sendMail)
 
