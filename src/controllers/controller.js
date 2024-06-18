@@ -72,6 +72,7 @@ module.exports = {
                     _id: registro._id,
                     player: registro.player,
                     nome: registro.nome,
+                    email: registro.email,
                     mundo: registro.mundo,
                     badge: registro.badge,
                     ammount: registro.ammount,
