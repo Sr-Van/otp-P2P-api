@@ -37,5 +37,9 @@ module.exports = {
     },
     addAmmount: async (ammount, player) => {
         return database.registros.updateOne({ player: player }, { $inc: { ammount: ammount } })
+    },
+
+    removeAmmount: async (ammount, player) => {
+        return database.registros.updateOne({ player: player }, { $inc: { ammount: -ammount } })
     }
 }
