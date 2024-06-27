@@ -410,9 +410,14 @@ module.exports = {
             await service.changeRegister(seller, attSeller)
             await service.changeRegister(buyer, attBuyer)
 
+            if(type !== 'seller') {
+                const attAmmountSeller = { $inc : {ammount : Number(itemBuyerExists.price)}}
+                await service.changeRegister(seller, attAmmountSeller)
+            }
+
             res.status(201).json({msg: 'Registros dos clientes atualizados.'})
         } catch(error) {
-            res.status(500).json({msg: 'Erro no servidor ' + error})
+            res.status(500).json({msg: 'Erro no servidor '})
         }
 
     },
