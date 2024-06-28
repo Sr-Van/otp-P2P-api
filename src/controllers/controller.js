@@ -365,6 +365,128 @@ module.exports = {
     
     },
 
+    cancelTrade: async (req, res) => {
+
+        const type = req.params.type
+        const {player, itemId, password} = req.body
+
+        const playerExists = await service.getOnePlayer(player)
+
+        if(!playerExists) {
+            return res.status(404).json({msg: 'Jogador não encontrado.'})
+        }
+
+        const checkPass = await bcrypt.compare(password, playerExists.senha)
+
+        if(!checkPass) {
+            return res.status(422).json({msg: "senha invalida!"})            
+        }
+
+        if(type === 'buyer') {
+            let itemExists = playerExists.compras.filter(item => item.itemId === itemId)[0]
+
+            if(!itemExists) {
+                res.status(404).json({msg: 'Item não encontrado.'})
+                return
+            }
+            
+            if(itemExists.situation !== 'ordered') {
+                res.status(404).json({msg: 'Item já em processo de troca.'})
+                return
+            } 
+
+            const newBuys = playerExists.compras.filter(item => item.itemId !== itemId)
+
+            itemExists.situation = 'available'
+
+            const playerTrade = await service.getOnePlayer(itemExists.trade_player)
+            const newTradePlayerSales = playerTrade.vendas.filter(item => item.itemId !== itemId)
+            let newTradePlayerOffers = playerTrade.anuncios
+            delete itemExists.trade_player
+            newTradePlayerOffers.push(itemExists)
+
+            try {
+
+                await service.changeRegister(playerExists.player, {
+                    $inc : {
+                        ammount : Number(itemExists.price)
+                    }
+                })
+    
+                const playerAtt = {
+                    $set : {
+                        compras : newBuys
+                    }
+                }
+                const playerTradeAtt = {
+                    $set : {
+                        vendas : newTradePlayerSales,
+                        anuncios : newTradePlayerOffers
+                    }
+                }
+                await service.changeRegister(player, playerAtt)
+                await service.changeRegister(playerTrade.player, playerTradeAtt)
+    
+    
+                res.status(201).json({msg: 'Troca cancelada e dinheiro devolvido.'})
+            }
+            catch(error) {
+                res.status(500).json({msg: 'Erro no servidor '})
+            }
+            return
+        }
+        
+        let itemExists = playerExists.vendas.filter(item => item.itemId === itemId)[0]
+
+        if(!itemExists) return res.status(404).json({msg: 'Item não encontrado.'})
+
+        if(itemExists.situation !== 'ordered') {
+            res.status(404).json({msg: 'Item já em processo de troca.'})
+            return
+        } 
+
+        const newSales = playerExists.vendas.filter(item => item.itemId !== itemId)
+        let newPlayerOffers = playerExists.anuncios
+
+        itemExists.situation = 'available'
+
+        const playerTrade = await service.getOnePlayer(itemExists.trade_player)
+        const newTradePlayerBuys = playerTrade.compras.filter(item => item.itemId !== itemId)
+        
+        delete itemExists.trade_player
+        newPlayerOffers.push(itemExists)
+
+        try {
+
+            await service.changeRegister(playerTrade.player, {
+                $inc : {
+                    ammount : Number(itemExists.price)
+                }
+            })
+
+            const playerAtt = {
+                $set : {
+                    vendas : newSales,
+                    anuncios : newPlayerOffers
+                }
+            }
+            const playerTradeAtt = {
+                $set : {
+                    compras : newTradePlayerBuys
+                }
+            }
+            await service.changeRegister(player, playerAtt)
+            await service.changeRegister(playerTrade.player, playerTradeAtt)
+
+        res.status(201).json({msg: 'Troca cancelada.'})
+        }
+        catch(error) {
+            res.status(500).json({msg: 'Erro no servidor '})
+        }
+
+       
+    },
+
     confirmTrade: async (req, res) => { 
 
         const type = req.params.type
