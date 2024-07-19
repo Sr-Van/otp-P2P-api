@@ -39,6 +39,9 @@ app.put('/remove/ammount/:player', middleware.checkToken, moneyController.remove
 app.delete('/delete/acc/:player', middleware.checkToken, controller.deleteAccount)
 app.post('/send/mail', middleware.checkToken, controller.sendMail)
 
+//beta routes
+app.post('/send/feedback', middleware.checkToken, controller.sendFeedback)
+
 app.listen(PORT, () => {
     console.log(`API listening on PORT ${PORT} `)
 })

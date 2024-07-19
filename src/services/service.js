@@ -41,5 +41,9 @@ module.exports = {
 
     removeAmmount: async (ammount, player) => {
         return database.registros.updateOne({ player: player }, { $inc: { ammount: -ammount } })
+    },
+
+    createFeedback: async (name, message, date) => {
+        return database.feedback.insertOne({ name: name, message: message, created_at: date })
     }
 }

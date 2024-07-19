@@ -623,5 +623,27 @@ module.exports = {
         catch(error) {
             res.status(500).json({msg: 'Erro no servidor '+ error})
         }
+    },
+
+    sendFeedback: async (req, res) => {
+
+        const {name, message} = req.body;
+
+        const userExists = await service.getOnePlayer(name);
+
+        if(!userExists) {
+            return res.status(404).json({msg: 'Jogador não encontrado.'})
+        }
+
+        let d = new Date();
+        const date = `${d.getDate()}-${d.getMonth() + 1}-${d.getFullYear()}`
+        
+        try {
+            await service.createFeedback(name, message, date);
+            res.status(201).json({msg: 'Feedback enviado com sucesso!'})
+        } catch(error) {
+            return res.status(500).json({msg: 'Erro no servidor '+ error})
+        }
+        
     }
 }

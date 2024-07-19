@@ -18,6 +18,7 @@ class Db {
         this.client = new MongoClient(process.env.MONGO_URI)
         this.database = this.client.db('Otp-P2P')
         this.registros = this.database.collection('registros')
+        this.feedback = this.database.collection('feedback')
     }
 
 }
